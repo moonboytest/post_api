@@ -3,7 +3,8 @@ package main
 import (
 	"GoNews/pkg/api"
 	"GoNews/pkg/storage"
-	"GoNews/pkg/storage/memdb"
+	"GoNews/pkg/storage/postgres"
+	"log"
 	"net/http"
 )
 
@@ -14,29 +15,31 @@ type server struct {
 }
 
 func main() {
+
 	// Создаём объект сервера.
 	var srv server
 
 	// Создаём объекты баз данных.
 	//
 	// БД в памяти.
-	db := memdb.New()
-    /*
+	//db := memdb.New()
+
 	// Реляционная БД PostgreSQL.
-	db2, err := postgres.New("postgres://postgres:postgres@server.domain/posts")
+	db2, err := postgres.New()
 	if err != nil {
 		log.Fatal(err)
 	}
-	// Документная БД MongoDB.
-	db3, err := mongo.New("mongodb://server.domain:27017/")
-	if err != nil {
-		log.Fatal(err)
-	}
-	_, _ = db2, db3
+	/*
+		// Документная БД MongoDB.
+		db3, err := mongo.New("mongodb://server.domain:27017/")
+		if err != nil {
+			log.Fatal(err)
+		}
+		_, _ = db2, db3
 	*/
 
 	// Инициализируем хранилище сервера конкретной БД.
-	srv.db = db
+	srv.db = db2
 
 	// Создаём объект API и регистрируем обработчики.
 	srv.api = api.New(srv.db)
