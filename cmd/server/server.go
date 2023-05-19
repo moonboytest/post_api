@@ -43,6 +43,9 @@ func main() {
 
 	// Создаём объект API и регистрируем обработчики.
 	srv.api = api.New(srv.db)
+	srv.db.AddPost(postgres.Post1)
+	srv.db.UpdatePost(postgres.UpdPost1)
+	//srv.db.Posts()
 
 	// Запускаем веб-сервер на порту 8080 на всех интерфейсах.
 	// Предаём серверу маршрутизатор запросов,
