@@ -8,7 +8,7 @@ CREATE TABLE authors (
 CREATE TABLE posts (
     id SERIAL PRIMARY KEY,
     author_id INTEGER REFERENCES authors(id) NOT NULL,
-    author_name TEXT NOT NULL,
+    author_name TEXT not NULL,
     title TEXT  NOT NULL,
     content TEXT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -16,5 +16,9 @@ CREATE TABLE posts (
 
 );
 
-INSERT INTO authors (id, name) VALUES (0, 'Дмитрий');
-INSERT INTO posts (id, author_id, title, content, author_name) VALUES (0, 0, 'Статья', 'Содержание статьи', 'sas');
+
+INSERT INTO authors (id, name) VALUES (1, 'Дмитрий');
+INSERT INTO authors (id, name) VALUES (2, 'михаил');
+INSERT INTO authors (id, name) VALUES (3, 'roman');
+/*
+INSERT INTO posts (id, author_id, title, content, author_name) VALUES (0, 0, 'Статья', 'Содержание статьи', 'IDI NAHUY'); */
