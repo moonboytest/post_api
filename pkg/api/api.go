@@ -4,6 +4,7 @@ import (
 	"GoNews/pkg/storage"
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -45,11 +46,19 @@ func (api *API) postsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	// Удаляем неформатированные поля CreatedAt и PublishedAt
+	for i := range posts {
+		posts[i].CreatedAt = time.Time{}
+		posts[i].PublishedAt = time.Time{}
+	}
+
 	bytes, err := json.Marshal(posts)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
 	w.Write(bytes)
 }
 

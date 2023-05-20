@@ -4,7 +4,6 @@ import (
 	"GoNews/pkg/config"
 	"GoNews/pkg/storage"
 	"context"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"time"
@@ -28,7 +27,6 @@ func New() (*Storage, error) {
 	postgresString := config.PostgresString
 	db, err := pgxpool.Connect(ctx,
 		postgresString)
-	fmt.Println("все гуд")
 	if err != nil {
 		log.Fatalf("Unable to connect to database: %v\n", err)
 
@@ -90,6 +88,9 @@ func (s *Storage) Posts() ([]storage.Post, error) {
 		if err != nil {
 			return nil, err
 		}
+		// Форматируем время в нужный формат
+		p.CreatedAtFormatted = p.CreatedAt.Format("06-01-02 15-04")
+		p.PublishedAtFormatted = p.PublishedAt.Format("06-01-02 15-04")
 		posts = append(posts, p)
 	}
 	return posts, rows.Err()
@@ -98,6 +99,11 @@ func (s *Storage) Posts() ([]storage.Post, error) {
 
 //Добавляем пост в бд
 func (s *Storage) AddPost(p storage.Post) error {
+	//Начало транзакции
+	tx, err := s.db.Begin(context.Background())
+	if err != nil {
+		return nil
+	}
 
 	var author_name string
 	//Забираем имя автора из связаной таблицы authors
@@ -128,6 +134,14 @@ func (s *Storage) AddPost(p storage.Post) error {
 		p.AuthorID, author_name, p.Title, p.Content, time, time)
 
 	if err != nil {
+		//В случае ошибки откатываемся назад
+		tx.Rollback(context.Background())
+		return err
+	}
+
+	//Фиксация изменений
+	err = tx.Commit(context.Background())
+	if err != nil {
 		return err
 	}
 
@@ -136,7 +150,7 @@ func (s *Storage) AddPost(p storage.Post) error {
 
 //Обновляем данные в посте. Изменяем название и текст, время публикации
 //изменяется автоматически
-func (s *Storage) UpdatePost(post storage.Post) error {
+func (s *Storage) UpdatePost(p storage.Post) error {
 	//Начало транзакции
 	tx, err := s.db.Begin(context.Background())
 	if err != nil {
@@ -144,7 +158,6 @@ func (s *Storage) UpdatePost(post storage.Post) error {
 	}
 
 	time := time.Now()
-	fmt.Print(1)
 	_, err = s.db.Exec(context.Background(), `
 	UPDATE posts
 	SET title = $2, 
@@ -152,8 +165,7 @@ func (s *Storage) UpdatePost(post storage.Post) error {
 	published_at = $4
 	WHERE id = $1
 	`,
-		post.ID, post.Title, post.Content, time)
-	fmt.Print(2)
+		p.ID, p.Title, p.Content, time)
 	if err != nil {
 		//В случае ошибки откатываемся назад
 		tx.Rollback(context.Background())
@@ -166,20 +178,17 @@ func (s *Storage) UpdatePost(post storage.Post) error {
 	}
 	return nil
 }
-func (s *Storage) DeletePost(storage.Post) error {
+
+//Удаление поста
+func (s *Storage) DeletePost(p storage.Post) error {
+	_, err := s.db.Exec(context.Background(), `
+	DELETE FROM posts
+	WHERE id = $1 `,
+		p.ID)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
-var Post1 = storage.Post{
-	ID:       1,
-	AuthorID: 1,
-	Title:    "E",
-	Content:  "2Go is a new language. Although it borrows ideas from existing languages, it has unusual properties that make effective Go programs different in character from programs written in its relatives. A straightforward translation of a C++ or Java program into Go is unlikely to produce a satisfactory result—Java programs are written in Java, not Go. On the other hand, thinking about the problem from a Go perspective could produce a successful but quite different program. In other words, to write Go well, it's important to understand its properties and idioms. It's also important to know the established conventions for programming in Go, such as naming, formatting, program construction, and so on, so that programs you write will be easy for other Go programmers to understand.",
-}
 
-var UpdPost1 = storage.Post{
-	ID:       1,
-	AuthorID: 1,
-	Title:    "123",
-	Content:  "321",
-}

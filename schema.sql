@@ -21,4 +21,5 @@ INSERT INTO authors (id, name) VALUES (1, 'Дмитрий');
 INSERT INTO authors (id, name) VALUES (2, 'михаил');
 INSERT INTO authors (id, name) VALUES (3, 'roman');
 /*
-INSERT INTO posts (id, author_id, title, content, author_name) VALUES (0, 0, 'Статья', 'Содержание статьи', 'IDI NAHUY'); */
+INSERT INTO posts (id, author_id, title, content, author_name) VALUES (0, 0, 'Статья', 'Содержание статьи', 'IDI NAHUY'); 
+*/

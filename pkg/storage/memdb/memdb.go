@@ -1,3 +1,4 @@
+//Заглушка
 package memdb
 
 import "GoNews/pkg/storage"
